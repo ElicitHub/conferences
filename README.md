@@ -2,7 +2,7 @@
 
 We will be using R, Rstudio, the tidyverse, and Stan via the rstan and brms libraries.
 
-If you want to following along on your own machine, please install the following software before the workshop.
+If you want to follow along on your machine, please install the following software before the workshop.
 
 1. R: https://cloud.r-project.org
 2. RStudio: https://www.rstudio.com/products/rstudio/download/
