@@ -1,8 +1,13 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # ODSC West 2018 Materials for Stanned Up: Bayesian Methods using Stan
 
 ## Prerequisites
 
-We will be using R, Rstudio, the tidyverse, and Stan via the rstan and brms libraries. Someone who has been introduced to Bayesian inference, has some R and regression background, but doesn't know where to start is the ideal candidate for this workshop. 
+We will be using R, Rstudio, the tidyverse, and Stan via the rstan and brms libraries. Someone who has been introduced to Bayesian inference, has some R and regression background, but doesn't know where to start is a good candidate for this workshop. Intermediate to advanced R users looking for an introduction to Stan will also benefit.
 
 If you want to follow along on your machine during the workshop, please install the following software beforehand.
 
