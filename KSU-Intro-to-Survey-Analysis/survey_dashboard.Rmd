@@ -1,0 +1,101 @@
+---
+title: "Banner Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+  vertical_layout: scroll
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+
+#adding orientation: rows above changes the view to rows
+ 
+if (!require(pacman)) {
+  install.packages('pacman')
+}
+
+#notice that you do not have to use install.packages()
+pacman::p_load(flexdashboard, stringr, plotly, ggplot2, ggthemes, readr, formattable, openxlsx, kableExtra, scales, tidyr, Hmisc, dplyr)
+
+#use the percent option in the package scales
+percent<-scales::percent
+
+```
+
+```{r global, include=FALSE}
+
+#raw survey data
+survey_df <- read_csv('survey_results.csv')
+#question metadata
+question_df <- read_csv('question_metadata.csv')
+
+survey_tidy <- survey_df %>%
+  gather(question, answer, -(customer_id)) %>%
+  inner_join(question_df, by=c('question'='question'))
+
+survey_groups <- survey_df %>%
+  mutate(age_group = case_when(Q01 == '18 - 24' ~ '18 - 24',
+                               Q01 == '25 - 34' ~ '25 - 34',
+                               Q01 == '35 - 44' ~ '35 - 44',
+                               Q01 == '45 - 49' | Q01 == '50 +' ~ '45+'),
+         nps = case_when(Q05<=6 ~ 'Detractor',
+                         Q05 %in% c(7,8) ~ 'Passive',
+                         Q05 >=9 ~ 'Promoter')) %>%
+  select(customer_id, age_group, nps)
+
+survey_tidy_final <- survey_tidy %>%
+  inner_join(survey_groups, by=c('customer_id' = 'customer_id'))
+
+#banner summary
+banner_df <- survey_tidy_final %>% 
+  group_by(parent_question, question, survey_question, short_description, answer) %>%
+  #another way to calculate the response count is by counting the unique customers 
+  summarise(response_count = n_distinct(customer_id)) %>%
+  mutate(pct_response = percent(response_count/sum(response_count)),
+         question_num_detail = paste(question, survey_question, sep = ' - ')) %>%
+  ungroup()
+
+
+```
+
+
+Inputs {.sidebar data-width=300}
+-----------------------------------------------------------------------
+Select a question to explore from the drop down box below. 
+
+```{r}
+#input elements are sliders, checkboxes...) 
+#this select input makes a drop down box avaliable called 'question_banner'
+#Using {.sidebar} above puts our drop down box to the left, this is default
+#we can change the width of the bar by adding data-width=some number here
+selectInput('question_banner', 'Question', unique(banner_df$question_num_detail))
+
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Title of The Table Here
+
+```{r}
+
+#output elements are plots tables
+#the render table function accessed the values from what was selected in 'question_banner' via the expression: input$question_banner
+#Column above tells us the orientation of everything we want on the dashboard
+renderTable({
+    banner_df %>%
+    filter(question_num_detail==input$question_banner) %>%
+    select(short_description, answer, pct_response) %>%
+    rename(`Survey Question` = short_description, Answer = answer, `Pct Response`=pct_response)
+    
+})
+
+```
+
+### Research Overview
+
+We can add another box and type some information about the research project. 
+
+### Reference
+
+[To learn more about flexdashboard check out this site](https://rmarkdown.rstudio.com/flexdashboard/).
